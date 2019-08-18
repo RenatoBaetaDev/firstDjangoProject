@@ -26,14 +26,36 @@
 
 
 </head>
-<body>
-    {% block navbar %}
-    {% endblock %}
-    
-    {% block content %}
-    <div class="container">
-        {% block page_content %}{% endblock %}
-    </div>
+    <body>
+        {% block navbar %}
 
-    {% endblock %}
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-colour">
+
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+                Project Name
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">                
+                    <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+                    <a class="nav-item nav-link" href="#">Features</a>
+                    <a class="nav-item nav-link" href="#">Sign In</a>                
+                    <a class="nav-item nav-link" href="#">Sign Up</a>
+                </div>
+            </div>
+        </nav>       
+
+        {% endblock %}
+        
+        {% block content %}
+        <div class="container" id="content">
+            {% block page_content %}{% endblock %}
+        </div>
+
+        {% endblock %}
+    </body>
 </html>

@@ -1,0 +1,8 @@
+.navbar-colour {
+    background: linear-gradient(to right, black, rgba(0, 127, 254, 0.527)); 
+}
+
+#content {
+    /* background: linear-gradient(to right, black, rgba(0, 127, 254, 0.527)); */
+    background-color: black;
+}

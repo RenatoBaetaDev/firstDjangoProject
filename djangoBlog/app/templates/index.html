@@ -4,17 +4,8 @@
 
 {% block page_content %}
     {% if request.user.is_authenticated %}
-        <h1>Olá {{request.user.username}} </h1>
-        <form method="POST" class="post-form">
-            {% csrf_token %}
-            <p><b>{{form.body.help_text}}</b></p>      
-            <p>{{ form.body }}</p>
-            <p><button type="submit" class="save btn btn-default">Postar</button></p> 
-        </form>            
-    {% else %}
 
-        <div class="row justify-content-md-center">
-            
+        <div class="row justify-content-md-center">     
             <div class="card mb-3" style="max-width: 540px;">
                 <div class="row no-gutters">
                     <div class="col-md-2">
@@ -24,18 +15,19 @@
                         <div class="card-body">
 
                             <form action="">
+                                {% csrf_token %}
                                 <div class="form-group">
-                                    <input type="text" name="" id="" placeholder="What are you thinking about?" class="form-control">
+                                    <input type="text" name="newPost" id="newPost" placeholder="What are you thinking about?" class="form-control">
                                 </div>
                             </form>                              
                             
-                            <a href="#" class="btn btn-primary">Post</a>
+                            <a href="#" class="btn btn-primary" onclick="sendPost()">Post</a>
                         </div>
                     </div>
                 </div>
-            </div>             
-            
+            </div>           
         </div>
+
     {% endif %}
     
 
@@ -51,6 +43,28 @@
 {% block scripts %}
     <script>
 
+        function getPosts(){
+            $("#posts").html('');
+            $.get('{% url "get_posts" %}', function(data){
+                posts = JSON.parse(data)
+                for (let index = 0; index < posts.length; index++) {
+                    const element = posts[index]['fields'];
+                    renderPost(element)                    
+                }
+            })
+        }
+
+        function sendPost(){
+            var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+
+            $.post('{% url "post_save" %}', {
+                text: $("#newPost").val(),
+                csrfmiddlewaretoken: CSRFtoken
+            }, function(data) {
+                getPosts()
+            })
+        }
+
         function renderPost(post){
             html = `<div class="row justify-content-md-center">
                         <div class="card text-center mb-3" style="max-width: 540px;">
@@ -60,10 +74,10 @@
                                 </div>             
                                 <div class="col-md-8">
                                     <div class="card-body">
-                                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                                        <p class="card-text">${post.text}</p>
                                     </div>
                                     <div class="card-footer text-muted">
-                                        2 days ago
+                                        ${post.timestamp}
                                         <i class="fas fa-user"></i>
                                         <i class="far fa-user"></i>
                                         <i class="fas fa-heart"></i>                                        
@@ -78,11 +92,8 @@
 
         $(document).ready(function(){
 
-            posts = ['teste', 'teste2'];
-
-            posts.forEach(element => {
-                renderPost(element);
-            });            
+            getPosts()            
+ 
         })
 
 

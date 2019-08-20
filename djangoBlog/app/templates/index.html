@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Meu blog{% endblock %}
+
+{% block page_content %}
+    {% if request.user.is_authenticated %}
+        <h1>Olá {{request.user.username}} </h1>
+        <form method="POST" class="post-form">
+            {% csrf_token %}
+            <p><b>{{form.body.help_text}}</b></p>      
+            <p>{{ form.body }}</p>
+            <p><button type="submit" class="save btn btn-default">Postar</button></p> 
+        </form>            
+    {% else %}
+
+        <div class="row justify-content-md-center">
+            
+            <div class="card mb-3" style="max-width: 540px;">
+                <div class="row no-gutters">
+                    <div class="col-md-2">
+                        <img src="/static/img/logo.png" class="card-img post-img" alt="...">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+
+                            <form action="">
+                                <div class="form-group">
+                                    <input type="text" name="" id="" placeholder="What are you thinking about?" class="form-control">
+                                </div>
+                            </form>                              
+                            
+                            <a href="#" class="btn btn-primary">Post</a>
+                        </div>
+                    </div>
+                </div>
+            </div>             
+            
+        </div>
+    {% endif %}
+    
+
+        <div class="" id="posts">
+
+        </div>
+
+        <br>
+  
+    
+{% endblock %}
+
+{% block scripts %}
+    <script>
+
+        function renderPost(post){
+            html = `<div class="row justify-content-md-center">
+                        <div class="card text-center mb-3" style="max-width: 540px;">
+                            <div class="row no-gutters">
+                                <div class="col-md-4">
+                                    <img src="/static/img/logo.png" class="card-img post-img" alt="...">
+                                </div>             
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                                    </div>
+                                    <div class="card-footer text-muted">
+                                        2 days ago
+                                        <i class="fas fa-user"></i>
+                                        <i class="far fa-user"></i>
+                                        <i class="fas fa-heart"></i>                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+            $("#posts").append(html);
+        }
+
+        $(document).ready(function(){
+
+            posts = ['teste', 'teste2'];
+
+            posts.forEach(element => {
+                renderPost(element);
+            });            
+        })
+
+
+
+    </script>
+{% endblock %}
+
+

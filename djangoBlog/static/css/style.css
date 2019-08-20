@@ -1,8 +1,13 @@
 .navbar-colour {
-    background: linear-gradient(to right, black, rgba(0, 127, 254, 0.527)); 
+    background: linear-gradient(to right, black 20%, rgba(0, 127, 254, 0.527)); 
 }
 
-#content {
-    /* background: linear-gradient(to right, black, rgba(0, 127, 254, 0.527)); */
-    background-color: black;
+body {
+    background: linear-gradient(135deg, black, rgba(0, 127, 254, 0.527));
+    /* background-color: rgba(0, 127, 254, 0.527) */
+}
+
+.post-img {
+    width: 120;
+    height: 120;
 }

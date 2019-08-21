@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Meu blog{% endblock %}
+
+{% block page_content %}
+    {% if request.user.is_authenticated %}
+
+        
+        <div class="page-header">
+            <img src="{{ user.gravatar }}" alt="Avatar" class="img-rounded profile-thumbnail">
+            <div class="profile-header">
+                <h1>{{ user.username }}</h1>
+                {% if user.first_name or profile.location %}
+                    <p>
+                        {% if user.first_name %} {{ user.first_name }} {% endif %}
+                        {% if user.last_name %} {{ user.last_name }} {% endif %}
+                        {% if profile.location %}
+                            From <a href="http://maps.google.com/?q={{ profile.location }}">{{ profile.location }}</a>
+                        {% endif %}
+                    </p>
+                {% endif %}
+                {% if request.user.is_superuser %}
+                    <p><a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
+                    <a href="{% url 'edit_profile_admin' user.username %}" class="btn btn-danger">Edit Profile [Admin]</a>
+                {% endif %}
+                {% if profile.about_me %}
+                    <p>{{ profile.about_me }}</p>
+                {% endif %}
+                        {% if not following %}    
+                            <a href="#" class="btn btn-primary">
+                                Follow
+                            </a>
+                        {% else %}
+                            <a href="#" class="btn btn-default">
+                                Unfollow
+                            </a>
+                        {% endif %}
+                {# {% endif %} #}
+                <a href="#">
+                    Followers: <span class="badge">{{ profile.followed.count }}</span>
+                </a>
+                
+            </div>
+        </div>   
+
+
+    {% endif %}
+    
+    
+{% endblock %}

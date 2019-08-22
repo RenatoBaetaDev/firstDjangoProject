@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.views import index, PostView, UserProfile, UserProfileEditAdmin
+from app.views import index, PostView, UserProfile, UserProfileEditAdmin, LikeView
 
 urlpatterns = [
     path('', index, name="index"),
@@ -27,4 +27,5 @@ urlpatterns = [
         'user/<str:username>/edit', UserProfileEditAdmin.as_view(),
         name='edit_profile_admin'
     ),
+    path('like_post/', LikeView.as_view(), name="like_post"),
 ]

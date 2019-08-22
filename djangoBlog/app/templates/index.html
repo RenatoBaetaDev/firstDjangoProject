@@ -43,13 +43,35 @@
 {% block scripts %}
     <script>
 
+        function needAuthentication(){
+            alert("In order to like this post you need first to Sign In.");
+        }
+
+        function like(id){
+            if('{{request.user.is_authenticated}}' == 'False'){
+                needAuthentication();
+                return false;
+            }
+
+            var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+
+            $.post('{% url "like_post" %}', {
+                id: id,
+                user: {{ request.user.id }},
+                csrfmiddlewaretoken: CSRFtoken
+            }, function(data) {
+                console.log(data)
+                getPosts()
+            })
+        }
+
         function getPosts(){
             $("#posts").html('');
             $.get('{% url "get_posts" %}', function(data){
                 posts = JSON.parse(data)
+                console.log(posts)
                 for (let index = 0; index < posts.length; index++) {
-                    const element = posts[index]['fields'];
-                    renderPost(element)                    
+                    renderPost(posts[index])
                 }
             })
         }
@@ -70,7 +92,7 @@
                         <div class="card text-center mb-3" style="max-width: 540px;">
                             <div class="row no-gutters">
                                 <div class="col-md-4">
-                                    <img src="/static/img/logo.png" class="card-img post-img" alt="...">
+                                    <img src="${post.picture}" class="card-img post-img" alt="...">
                                 </div>             
                                 <div class="col-md-8">
                                     <div class="card-body">
@@ -78,9 +100,8 @@
                                     </div>
                                     <div class="card-footer text-muted">
                                         ${post.timestamp}
-                                        <i class="fas fa-user"></i>
-                                        <i class="far fa-user"></i>
-                                        <i class="fas fa-heart"></i>                                        
+                                        <i class="far fa-comments">Comment</i>
+                                        <a href="#" onClick="like(${post.id})"><i class="{% if iveLiked %} fas fa-heart {% else %} far fa-heart {% endif %}">${post.likes == undefined ? 0 : post.likes} Likes</i></a>
                                     </div>
                                 </div>
                             </div>

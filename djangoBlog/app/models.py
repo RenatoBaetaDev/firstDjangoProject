@@ -2,14 +2,13 @@ import hashlib
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
-
-
+from django.conf import settings
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     about_me = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=64, blank=True)
-    picture = models.CharField(max_length=64, blank=True)
+    picture = models.FileField(upload_to='documents/', max_length=64, blank=True)
 
 
 class Post(models.Model):
@@ -18,6 +17,16 @@ class Post(models.Model):
     timestamp = models.DateTimeField(default=datetime.utcnow)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
+class Comment(models.Model):
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
+    author = models.CharField(max_length=200)
+    text = models.TextField()
+    created_date = models.DateTimeField(default=datetime.utcnow)
+
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='postLikes')
+    created = models.DateTimeField(auto_now_add=True)
 
 class UserFunctions:
     @property

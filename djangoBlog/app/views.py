@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from app.models import Post, Profile, Like
+from app.models import Post, Profile, Like, Comment
 from django.contrib.auth.models import User
 from datetime import datetime
 from django.views import View
 from django.core import serializers
-from django.db.models import Count
+from django.db.models import Count, Case, When, Value, IntegerField
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from app.forms import EditProfileForm, EditUserForm
@@ -42,11 +42,13 @@ class PostView(View):
 
     def get(self, request, *args, **kwargs):
 
-        objects = Post.objects.annotate(likes=Count('postLikes')).values('author__profile__picture').order_by('-timestamp')
+
+        objects = Post.objects.annotate(likes=Count('postLikes')) \
+            .annotate(comment_count=Count('comments')) \
+            .annotate(hasComments=Case(When(comment_count=0, then=Value(False)), default=Value(True), output_field=IntegerField())) \
+            .values('id','text','timestamp','likes','author__profile__picture', 'hasComments').order_by('-timestamp')
 
         json_data = json.dumps(list(objects), cls=DjangoJSONEncoder)
-
-        # data = serializers.serialize('json', json_data)
 
         return JsonResponse(json_data, safe=False)
 
@@ -84,14 +86,18 @@ class UserProfileEditAdmin(View):
         user = User.objects.filter(username=self.kwargs['username']).first()
         profile = Profile.objects.filter(user=user).first()
         user_form = EditUserForm(request.POST, instance=user)
-        profile_form = EditProfileForm(request.POST, instance=profile)
+        profile_form = EditProfileForm(request.POST, request.FILES, instance=profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form = user_form.save()
             custom_form = profile_form.save(False)
             custom_form.user = user_form
             custom_form.save()
             return redirect('user', username=user.username)
-        return render(request, self.template_name, args)
+
+        context = {}
+        for var in args:
+            context[var] = var
+        return render(request, self.template_name, context)
 
 
 class LikeView(View):
@@ -100,9 +106,7 @@ class LikeView(View):
         id = request.POST.get('id', None)
         user = request.POST.get('user', None)
 
-        liked = Like.objects.filter(post_id=id, user_id=user)
-
-        print(liked)
+        liked = Like.objects.filter(post=id, user=user)
 
         if liked:
             liked.delete()
@@ -117,3 +121,32 @@ class LikeView(View):
 
         return JsonResponse(data)
 
+class CommentView(View):
+
+    def post(self, request, *args, **kwargs):
+        text = request.POST.get('text', None)
+        user = request.POST.get('user', None)
+        post = request.POST.get('post', None)
+
+        data = {
+            'message': 'Error trying to Save Comment.'
+        }
+
+        if text is not None and user is not None and post is not None:
+            comment = Comment(text=text, author=user, post=Post.objects.filter(id=post).first())
+            comment.save()
+            data = {
+                'message': 'Comment Succesfully Saved.'
+            }
+
+        return JsonResponse(data)
+
+
+    def get(self, request, *args, **kwargs):
+        post = request.GET.get('post', None)
+
+        objects = Comment.objects.filter(post=post).values().order_by('-created_date')
+
+        json_data = json.dumps(list(objects), cls=DjangoJSONEncoder)
+
+        return JsonResponse(json_data, safe=False)

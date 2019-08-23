@@ -8,7 +8,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     about_me = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=64, blank=True)
-    picture = models.FileField(upload_to='documents/', max_length=64, blank=True)
+    picture = models.ImageField(upload_to='blog/%Y/%m/%d')
 
 
 class Post(models.Model):

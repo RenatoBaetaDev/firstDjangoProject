@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 
 {% block title %}Meu blog{% endblock %}
 
@@ -9,7 +10,7 @@
             <div class="card mb-3" style="max-width: 540px;">
                 <div class="row no-gutters">
                     <div class="col-md-2">
-                        <img src="/static/img/logo.png" class="card-img post-img" alt="...">
+                        <img src="{% static 'img/logo.png' %}" class="card-img post-img" alt="...">
                     </div>
                     <div class="col-md-8">
                         <div class="card-body">
@@ -42,6 +43,86 @@
 
 {% block scripts %}
     <script>
+
+        function renderComments(comment){
+            html = `<div class="row justify-content-md-center openComments" >
+                        <div class="card mb-3" style="max-width: 540px;">
+                            <div class="row no-gutters">
+                                <div class="col-md-2">
+                                    <img src="{% static 'img/logo.png' %}" class="card-img post-img" alt="...">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+
+                                        <form action="">
+                                            <div class="form-group">
+                                                <input type="text" name="newComment" id="newComment" value="${comment.text}" class="form-control" disabled>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            $("#post-"+comment.post_id).after(html);
+        }
+
+        function getPostComments(postID){
+            $(".openComments").remove();
+
+            $.get('{% url "get_comments" %}', {post: postID}, function(data){
+                comments = JSON.parse(data)
+
+                if (!comments.length > 0){
+                    alert('This post has no Comments.')
+                    return false;
+                }
+
+                for (let index = 0; index < comments.length; index++) {
+                    renderComments(comments[index])
+                }
+            })
+        }
+
+        function sendComment(postID){
+            var CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+
+            $.post('{% url "comment_post" %}', {
+                post: postID,
+                text: $("#newComment").val(),
+                user: {{ request.user.id }},
+                csrfmiddlewaretoken: CSRFtoken
+            }, function(data) {
+                $("#comment-"+postID).remove();
+            })
+        }
+
+        function commentPost(id){
+            html = `<div class="row justify-content-md-center " id="comment-${id}">
+                        <div class="card mb-3" style="max-width: 540px;">
+                            <div class="row no-gutters">
+                                <div class="col-md-2">
+                                    <img src="{% static 'img/logo.png' %}" class="card-img post-img" alt="...">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+
+                                        <form action="">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <input type="text" name="newComment" id="newComment" placeholder="Comment this post" class="form-control">
+                                            </div>
+                                        </form>
+
+                                        <a href="#" class="btn btn-primary" onclick="sendComment(${id})">Post</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+            $("#post-"+id).after(html);
+        }
 
         function needAuthentication(){
             alert("In order to like this post you need first to Sign In.");
@@ -88,11 +169,11 @@
         }
 
         function renderPost(post){
-            html = `<div class="row justify-content-md-center">
+            html = `<div class="row justify-content-md-center" id="post-${post.id}" >
                         <div class="card text-center mb-3" style="max-width: 540px;">
                             <div class="row no-gutters">
                                 <div class="col-md-4">
-                                    <img src="${post.picture}" class="card-img post-img" alt="...">
+                                    <img src="{{ MEDIA_URL }}${post.author__profile__picture}" class="card-img post-img" alt="...">
                                 </div>             
                                 <div class="col-md-8">
                                     <div class="card-body">
@@ -100,8 +181,10 @@
                                     </div>
                                     <div class="card-footer text-muted">
                                         ${post.timestamp}
-                                        <i class="far fa-comments">Comment</i>
+                                        <a href="#" onClick="commentPost(${post.id})"><i class="far fa-comments">Comment</i></a>
                                         <a href="#" onClick="like(${post.id})"><i class="{% if iveLiked %} fas fa-heart {% else %} far fa-heart {% endif %}">${post.likes == undefined ? 0 : post.likes} Likes</i></a>
+                                        ${post.hasComments == '1' ? '<a href="#" onClick="getPostComments('+post.id+')"><i class="far fa-comments">Show other comments</i></a>' : ''}
+
                                     </div>
                                 </div>
                             </div>

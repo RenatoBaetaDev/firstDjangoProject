@@ -182,9 +182,8 @@
                                     <div class="card-footer text-muted">
                                         ${post.timestamp}
                                         <a href="#" onClick="commentPost(${post.id})"><i class="far fa-comments">Comment</i></a>
-                                        <a href="#" onClick="like(${post.id})"><i class="{% if iveLiked %} fas fa-heart {% else %} far fa-heart {% endif %}">${post.likes == undefined ? 0 : post.likes} Likes</i></a>
+                                        <a href="#" onClick="like(${post.id})"><i class="${post.iveLiked == '1' ? 'fas fa-heart' : 'far fa-heart'} ">${post.likes == undefined ? 0 : post.likes} Likes</i></a>
                                         ${post.hasComments == '1' ? '<a href="#" onClick="getPostComments('+post.id+')"><i class="far fa-comments">Show other comments</i></a>' : ''}
-
                                     </div>
                                 </div>
                             </div>

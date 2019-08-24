@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.views import index, PostView, UserProfile, UserProfileEditAdmin, LikeView, CommentView
+from app.views import index, PostView, UserProfile, UserProfileEditAdmin, LikeView, CommentView, userLogout
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('', index, name="index"),
+    path('/logout', userLogout, name="logout"),
     path('admin/', admin.site.urls),
     path('post_save/', PostView.as_view(), name="post_save"),
     path('get_posts/', PostView.as_view(), name="get_posts"),

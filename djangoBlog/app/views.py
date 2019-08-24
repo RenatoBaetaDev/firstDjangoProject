@@ -5,13 +5,14 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from django.views import View
 from django.core import serializers
-from django.db.models import Count, Case, When, Value, IntegerField
+from django.db.models import Count, Case, When, Value, IntegerField, Q
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from app.forms import EditProfileForm, EditUserForm
 from django.shortcuts import (
     get_object_or_404, redirect, render, HttpResponse
 )
+from django.contrib.auth import logout
 
 
 # Create your views here.
@@ -19,6 +20,10 @@ from django.shortcuts import (
 def index(request):
     return render(request, 'index.html')
 
+
+def userLogout(request):
+    logout(request)
+    return render(request, 'index.html')
 
 class PostView(View):
 
@@ -42,11 +47,18 @@ class PostView(View):
 
     def get(self, request, *args, **kwargs):
 
+        # qs2 = Offer.objects.select_related('subscription').extra(
+        #     select={'monthly_fee': 'mobile_subscription.monthly_fee'})
 
+        user = User.objects.filter(id=request.user.id).first()
+
+        print(user)
         objects = Post.objects.annotate(likes=Count('postLikes')) \
             .annotate(comment_count=Count('comments')) \
             .annotate(hasComments=Case(When(comment_count=0, then=Value(False)), default=Value(True), output_field=IntegerField())) \
-            .values('id','text','timestamp','likes','author__profile__picture', 'hasComments').order_by('-timestamp')
+            .annotate(like_count=Count('postLikes', filter=Q(postLikes__user=user))) \
+            .annotate(iveLiked=Case(When(like_count=0, then=Value(False)), default=Value(True), output_field=IntegerField())) \
+            .values('id','text','timestamp','likes','author__profile__picture', 'hasComments', 'iveLiked').order_by('-timestamp')
 
         json_data = json.dumps(list(objects), cls=DjangoJSONEncoder)
 

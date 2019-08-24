@@ -52,6 +52,7 @@
                     {% if request.user.is_authenticated %}
 
                         <a class="nav-item nav-link {% if request.resolver_match.url_name == 'user' %} active {% endif %}" href="{% url 'user' user.username %}">Profile</a>                                                                
+                        <a class="nav-item nav-link " href="{% url 'logout' %}">Logout</a>
 
                     {% else %}
 
